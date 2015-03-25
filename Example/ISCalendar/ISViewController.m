@@ -22,6 +22,8 @@
 {
     [super viewDidLoad];
     
+    [[ISCalendar appearance] setTodayBackgroundColor:[UIColor orangeColor]];
+    
     NSDate *date = [NSDate date];
     self.dateFormatter = [[NSDateFormatter alloc] init];
     self.dateFormatter.dateStyle = NSDateFormatterFullStyle;

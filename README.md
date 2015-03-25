@@ -1,6 +1,6 @@
 # ISCalendar
 
-[![CI Status](http://img.shields.io/travis/Ivan Sinkarenko/ISCalendar.svg?style=flat)](https://travis-ci.org/Ivan Sinkarenko/ISCalendar)
+[![CI Status](http://img.shields.io/travis/Ivan Sinkarenko/ISCalendar.svg?style=flat)](https://travis-ci.org/ivany4/ISCalendar)
 [![Version](https://img.shields.io/cocoapods/v/ISCalendar.svg?style=flat)](http://cocoapods.org/pods/ISCalendar)
 [![License](https://img.shields.io/cocoapods/l/ISCalendar.svg?style=flat)](http://cocoapods.org/pods/ISCalendar)
 [![Platform](https://img.shields.io/cocoapods/p/ISCalendar.svg?style=flat)](http://cocoapods.org/pods/ISCalendar)
@@ -10,6 +10,8 @@
 To run the example project, clone the repo, and run `pod install` from the Example directory first.
 
 ## Requirements
+
+iOS 7.1+
 
 ## Installation
 

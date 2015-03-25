@@ -1,0 +1,11 @@
+source 'https://github.com/CocoaPods/Specs.git'
+
+target 'ISCalendar', :exclusive => true do
+  pod "ISCalendar", :path => "../"
+end
+
+target 'Tests', :exclusive => true do
+  pod "ISCalendar", :path => "../"
+
+  
+end

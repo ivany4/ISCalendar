@@ -2,6 +2,7 @@
 #import "ISCalendarViewController.h"
 #import "ISPopupCalendarTextField.h"
 
+#define BUNDLE_ID @"ISCalendar"
 
 @interface ISPopupCalendar () <UITextFieldDelegate, ISCalendarViewControllerDelegate, UIPopoverControllerDelegate>
 @property (nonatomic, strong) ISPopupCalendarTextField *textField;
@@ -44,7 +45,7 @@
     textField.translatesAutoresizingMaskIntoConstraints = NO;
     
     UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-    [button setImage:[UIImage imageNamed:@"calendar-blue-icon"] forState:UIControlStateNormal];
+    [button setImage:[UIImage imageNamed:@"ISCalendar.bundle/calendar-blue-icon.png"] forState:UIControlStateNormal];
     [button addTarget:self action:@selector(buttonPressed:) forControlEvents:UIControlEventTouchUpInside];
     button.translatesAutoresizingMaskIntoConstraints = NO;
     

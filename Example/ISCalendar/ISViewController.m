@@ -22,6 +22,7 @@
 {
     [super viewDidLoad];
     
+    [[ISCalendar appearance] setArrowColor:[UIColor redColor]];
     [[ISCalendar appearance] setTodayBackgroundColor:[UIColor orangeColor]];
     
     NSDate *date = [NSDate date];
@@ -40,6 +41,7 @@
     
     UILabel *calDate = [[UILabel alloc] init];
     self.calDate = calDate;
+    calDate.numberOfLines = 0;
     calDate.backgroundColor = [UIColor whiteColor];
     calDate.translatesAutoresizingMaskIntoConstraints = NO;
     [self.view addSubview:calDate];
@@ -54,6 +56,8 @@
         
         UILabel *popupDate = [[UILabel alloc] init];
         self.popupDate = popupDate;
+        popupDate.numberOfLines = 0;
+        popupDate.backgroundColor = [UIColor whiteColor];
         popupDate.translatesAutoresizingMaskIntoConstraints = NO;
         [self.view addSubview:popupDate];
         
@@ -72,6 +76,14 @@
     [self.view layoutIfNeeded];
 }
 
+- (void)viewDidLayoutSubviews
+{
+    [super viewDidLayoutSubviews];
+    self.calDate.preferredMaxLayoutWidth = self.calDate.frame.size.width;
+    self.popupDate.preferredMaxLayoutWidth = self.popupDate.frame.size.width;
+    [super viewDidLayoutSubviews];
+}
+
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
@@ -85,7 +97,7 @@
 
 - (void)selectedDateChanged:(ISCalendar *)sender
 {
-    self.calDate.text = [NSString stringWithFormat:@"Selected: %@", [self.dateFormatter stringFromDate:sender.selectedDate]];
+    self.calDate.text = [NSString stringWithFormat:@"Selected:\n%@", [self.dateFormatter stringFromDate:sender.selectedDate]];
 }
 
 @end

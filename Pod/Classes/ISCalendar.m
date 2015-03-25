@@ -1,14 +1,5 @@
 #import "ISCalendar.h"
 
-#define DATE_PICKER_SEPARATOR_COLOR     [UIColor colorWithWhite:235/255.0 alpha:1]
-#define NORMAL_DAY_COLOR                [UIColor colorWithRed:56/255. green:68/255. blue:77/255. alpha:1]
-#define NORMAL_DAY_BKG_COLOR            [UIColor whiteColor]
-#define TODAY_DAY_BKG_COLOR             [UIColor colorWithWhite:0.95 alpha:1]
-#define ACTIVE_DAY_BKG_COLOR            [UIColor colorWithRed:67/255. green:141/255. blue:196/255. alpha:1]
-#define ACTIVE_DAY_COLOR                [UIColor whiteColor]
-#define CELL_EDGE                       40
-#define SMALL_FONT                      [UIFont systemFontOfSize:9]
-#define NORMAL_DAY_FONT                 [UIFont boldSystemFontOfSize:17]
 
 #define TAG_TO_DAY(x) (x-1000)
 #define TAG_TO_VIEW(x) (TAG_TO_DAY(x)-1)
@@ -17,9 +8,12 @@
 #define THIS_MONTH(x) (x > 0 && x <= (NSInteger)_daysCount)
 #define NO_MONTH(x) (x == -1)
 
+#define CELL_EDGE 40
 #define WEEKDAY_MARGIN  3
 #define WEEKDAY_HEIGHT  10
 #define HEADER_HEIGHT   36
+
+#define BUNDLE_ID @"ISCalendar"
 
 #define CAL_WIDTH   CELL_EDGE*7+8
 #define DAYS_TOP_MARGIN HEADER_HEIGHT+1+WEEKDAY_HEIGHT+WEEKDAY_MARGIN*2+1
@@ -46,6 +40,8 @@ typedef NS_ENUM(NSUInteger, PNTCalendarDayType) {
 @property (nonatomic, strong) UILabel *monthLabel;
 @property (nonatomic, strong) UIButton *nextMonthButton;
 @property (nonatomic, strong) UIButton *previousMonthButton;
+@property (nonatomic, strong) CAShapeLayer *previousButtonShape;
+@property (nonatomic, strong) CAShapeLayer *nextButtonShape;
 @property (nonatomic, strong) UIView *topSeparator;
 @property (nonatomic, strong) NSDateComponents *todayComponents;
 @property (nonatomic, strong) NSDateComponents *visibleMonthComponents;
@@ -76,6 +72,19 @@ typedef NS_ENUM(NSUInteger, PNTCalendarDayType) {
 {
     self.todayComponents = [[NSCalendar autoupdatingCurrentCalendar] components:NSDayCalendarUnit|NSMonthCalendarUnit|NSYearCalendarUnit fromDate:[NSDate date]];
     _selectedDateComponents = nil;
+    
+    //Default appearance
+    _normalBackgroundColor = [UIColor whiteColor];
+    _normalTextColor = _todayTextColor = [UIColor colorWithRed:56/255. green:68/255. blue:77/255. alpha:1];
+    _normalTextFont = _highLightedTextFont = _todayTextFont = [UIFont boldSystemFontOfSize:17];
+    _highlightedTextColor = [UIColor whiteColor];
+    _highlightedBackgroundColor = _arrowColor = [UIColor colorWithRed:67/255. green:141/255. blue:196/255. alpha:1];
+    _todayBackgroundColor = [UIColor colorWithWhite:0.95 alpha:1];
+    _weekdayFont = [UIFont systemFontOfSize:9];
+    _separatorColor = [UIColor colorWithWhite:235/255.0 alpha:1];
+    
+    self.backgroundColor = _normalBackgroundColor;
+    
     [self setupSubviewsForDate:nil];
 }
 
@@ -132,7 +141,18 @@ typedef NS_ENUM(NSUInteger, PNTCalendarDayType) {
         self.previousMonthButton = [UIButton buttonWithType:UIButtonTypeCustom];
         self.previousMonthButton.frame = CGRectMake(0, 0, HEADER_HEIGHT, HEADER_HEIGHT);
         self.previousMonthButton.autoresizingMask = UIViewAutoresizingFlexibleRightMargin|UIViewAutoresizingFlexibleBottomMargin;
-        [self.previousMonthButton setImage:[UIImage imageNamed:@"calendar-left-arrow"] forState:UIControlStateNormal];
+        UIBezierPath* bezierPath = UIBezierPath.bezierPath;
+        [bezierPath moveToPoint: CGPointMake(HEADER_HEIGHT*5/8, HEADER_HEIGHT*9/32)];
+        [bezierPath addLineToPoint: CGPointMake(HEADER_HEIGHT*13/32, HEADER_HEIGHT*0.5)];
+        [bezierPath addLineToPoint: CGPointMake(HEADER_HEIGHT*5/8, HEADER_HEIGHT*23/32)];
+        CAShapeLayer *shapeLayer = [CAShapeLayer layer];
+        shapeLayer.frame = self.previousMonthButton.bounds;
+        shapeLayer.path = bezierPath.CGPath;
+        shapeLayer.fillColor = [UIColor clearColor].CGColor;
+        shapeLayer.strokeColor = self.arrowColor.CGColor;
+        shapeLayer.lineWidth = .75;
+        self.previousButtonShape = shapeLayer;
+        [self.previousMonthButton.layer addSublayer:shapeLayer];
         [self.previousMonthButton addTarget:self action:@selector(previousMonthButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:self.previousMonthButton];
     }
@@ -141,14 +161,25 @@ typedef NS_ENUM(NSUInteger, PNTCalendarDayType) {
         self.nextMonthButton = [UIButton buttonWithType:UIButtonTypeCustom];
         self.nextMonthButton.frame = CGRectMake(self.frame.size.width-HEADER_HEIGHT, 0, HEADER_HEIGHT, HEADER_HEIGHT);
         self.nextMonthButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin|UIViewAutoresizingFlexibleBottomMargin;
-        [self.nextMonthButton setImage:[UIImage imageNamed:@"calendar-right-arrow"] forState:UIControlStateNormal];
+        UIBezierPath* bezierPath = UIBezierPath.bezierPath;
+        [bezierPath moveToPoint: CGPointMake(HEADER_HEIGHT*13/32, HEADER_HEIGHT*9/32)];
+        [bezierPath addLineToPoint: CGPointMake(HEADER_HEIGHT*5/8, HEADER_HEIGHT*0.5)];
+        [bezierPath addLineToPoint: CGPointMake(HEADER_HEIGHT*13/32, HEADER_HEIGHT*23/32)];
+        CAShapeLayer *shapeLayer = [CAShapeLayer layer];
+        shapeLayer.frame = self.previousMonthButton.bounds;
+        shapeLayer.path = bezierPath.CGPath;
+        shapeLayer.fillColor = [UIColor clearColor].CGColor;
+        shapeLayer.strokeColor = self.arrowColor.CGColor;
+        shapeLayer.lineWidth = .75;
+        self.nextButtonShape = shapeLayer;
+        [self.nextMonthButton.layer addSublayer:shapeLayer];
         [self.nextMonthButton addTarget:self action:@selector(nextMonthButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:self.nextMonthButton];
     }
     
     if (!self.topSeparator) {
         self.topSeparator = [[UIView alloc] initWithFrame:CGRectMake(0, HEADER_HEIGHT, self.frame.size.width, 1)];
-        self.topSeparator.backgroundColor = DATE_PICKER_SEPARATOR_COLOR;
+        self.topSeparator.backgroundColor = self.separatorColor;
         self.topSeparator.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin|UIViewAutoresizingFlexibleWidth;
         [self addSubview:self.topSeparator];
     }
@@ -185,8 +216,8 @@ typedef NS_ENUM(NSUInteger, PNTCalendarDayType) {
         label.text = caption.uppercaseString;
         label.backgroundColor = [UIColor whiteColor];
         label.userInteractionEnabled = NO;
-        label.textColor = NORMAL_DAY_COLOR;
-        label.font = SMALL_FONT;
+        label.textColor = self.normalTextColor;
+        label.font = self.weekdayFont;
         label.textAlignment = NSTextAlignmentCenter;
         label.frame = CGRectMake((CELL_EDGE+1)*i, HEADER_HEIGHT+WEEKDAY_MARGIN, CELL_EDGE, WEEKDAY_HEIGHT);
         label.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleRightMargin;
@@ -223,7 +254,7 @@ typedef NS_ENUM(NSUInteger, PNTCalendarDayType) {
     mutableArray = [NSMutableArray arrayWithCapacity:6];
     for (NSUInteger i = 0; i < 8; i++) {
         UIView *separator = [[UIView alloc] init];
-        separator.backgroundColor = DATE_PICKER_SEPARATOR_COLOR;
+        separator.backgroundColor = self.separatorColor;
         if (i == 0 || i == 7) {
             //Edges should be of full height
             separator.frame = CGRectMake((CELL_EDGE+1)*i, 0, 1, trueHeight);
@@ -241,7 +272,7 @@ typedef NS_ENUM(NSUInteger, PNTCalendarDayType) {
     mutableArray = [NSMutableArray arrayWithCapacity:horizontalSeparatorCount];
     for (NSUInteger i = 0; i < horizontalSeparatorCount; i++) {
         UIView *separator = [[UIView alloc] init];
-        separator.backgroundColor = DATE_PICKER_SEPARATOR_COLOR;
+        separator.backgroundColor = self.separatorColor;
         separator.frame = CGRectMake(0, DAYS_TOP_MARGIN-1+(CELL_EDGE+1)*i, CAL_WIDTH, 1);
         separator.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleRightMargin;
         [mutableArray addObject:separator];
@@ -258,6 +289,12 @@ typedef NS_ENUM(NSUInteger, PNTCalendarDayType) {
     }
 }
 
+- (void)setArrowColor:(UIColor *)arrowColor
+{
+    _arrowColor = arrowColor;
+    self.previousButtonShape.strokeColor = self.nextButtonShape.strokeColor = arrowColor.CGColor;
+}
+
 - (void)willMoveToWindow:(UIWindow *)newWindow
 {
     [self updateCalendarSubviews];
@@ -269,35 +306,31 @@ typedef NS_ENUM(NSUInteger, PNTCalendarDayType) {
     UIColor *backgroundColor = nil;
     UIFont *titleLabeLFont = nil;
     UIColor *titleColor = nil;
-    UIColor *titleBackgroundColor = nil;
     
     
     switch (type) {
         case kCalendarDayToday:
+            backgroundColor = self.todayBackgroundColor;
+            titleLabeLFont = self.todayTextFont;
+            titleColor = self.todayTextColor;
+            break;
         case kCalendarDayRegular:
-            backgroundColor = NORMAL_DAY_BKG_COLOR;
-            titleLabeLFont = NORMAL_DAY_FONT;
-            titleColor = NORMAL_DAY_COLOR;
-            titleBackgroundColor = backgroundColor;
+            backgroundColor = self.normalBackgroundColor;
+            titleLabeLFont = self.normalTextFont;
+            titleColor = self.normalTextColor;
             break;
         case kCalendarDaySelected:
-            backgroundColor = ACTIVE_DAY_BKG_COLOR;
-            titleLabeLFont = NORMAL_DAY_FONT;
-            titleColor = ACTIVE_DAY_COLOR;
-            titleBackgroundColor = backgroundColor;
+            backgroundColor = self.highlightedBackgroundColor;
+            titleLabeLFont = self.highLightedTextFont;
+            titleColor = self.highlightedTextColor;
             break;
         default:
             break;
     }
     
-    if (type == kCalendarDayToday) {
-        backgroundColor = TODAY_DAY_BKG_COLOR;
-        titleBackgroundColor = TODAY_DAY_BKG_COLOR;
-    }
-    
     [button setBackgroundImage:backgroundImage forState:UIControlStateNormal];
     button.backgroundColor = backgroundColor;
-    button.titleLabel.backgroundColor = titleBackgroundColor;
+    button.titleLabel.backgroundColor = backgroundColor;
     
     [button setTitleColor:titleColor forState:UIControlStateNormal];
     button.titleLabel.font = titleLabeLFont;
